@@ -1,66 +1,610 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Milk Tea Empire - SCM Game</title>
-<style>
-body{font-family: Arial;text-align:center;background:#fff6e9;padding:40px;}
-h1{color:#b35a00;}
-#game{background:white;padding:30px;border-radius:15px;max-width:600px;margin:auto;box-shadow:0 0 10px rgba(0,0,0,0.1);}
-button{padding:12px 20px;margin:10px;font-size:16px;border:none;border-radius:8px;background:#ffb347;cursor:pointer;}
-button:hover{background:#ff9a00;}
-#profit{font-size:20px;margin-bottom:20px;color:#333;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Milk Tea Empire: SCM World Tour</title>
+  <style>
+    :root{
+      --bg1:#fff7ed;
+      --bg2:#ffe4c7;
+      --card:#ffffff;
+      --brown:#7a4b20;
+      --tea:#d97706;
+      --tea-dark:#b45309;
+      --green:#22c55e;
+      --red:#ef4444;
+      --soft:#fff2df;
+      --line:#f3c78f;
+      --shadow:0 14px 35px rgba(122,75,32,0.16);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, Arial, sans-serif;
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#3b2b1f;
+      min-height:100vh;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:20px 16px 80px;
+    }
+    .hero{
+      background: linear-gradient(135deg,#fffaf3,#ffe7c9);
+      border: 3px solid #ffd29b;
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after{
+      content:"🧋";
+      position:absolute;
+      right:18px;
+      top:8px;
+      font-size:72px;
+      opacity:0.18;
+      transform: rotate(-8deg);
+    }
+    h1{
+      margin:0 0 8px;
+      font-size: clamp(30px, 5vw, 54px);
+      line-height:1.02;
+      color:var(--brown);
+    }
+    .subtitle{
+      font-size: clamp(15px,2.4vw,20px);
+      margin:0;
+      color:#6b4c2c;
+      max-width:760px;
+    }
+    .stats{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:12px;
+    }
+    .stat{
+      background:#fff;
+      border:2px solid #ffe0b5;
+      border-radius:18px;
+      padding:14px;
+      text-align:center;
+    }
+    .stat .label{
+      font-size:12px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      color:#9a6d3d;
+      margin-bottom:6px;
+    }
+    .stat .value{
+      font-size:24px;
+      font-weight:800;
+      color:var(--tea-dark);
+    }
+
+    .progress-panel{
+      margin-top:18px;
+      background:#fff;
+      border-radius:20px;
+      padding:16px;
+      border:2px solid #ffe0b5;
+    }
+    .progress-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+    .progress-bar{
+      height:16px;
+      background:#fde9cb;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid #f5d3a2;
+    }
+    .progress-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#f59e0b,#fb923c);
+      transition:width .5s ease;
+    }
+    .layout{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: 1.02fr 1.2fr;
+      gap:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 3px solid #ffe0b5;
+      padding:18px;
+    }
+    .section-title{
+      margin:0 0 14px;
+      font-size:22px;
+      color:var(--brown);
+    }
+    .map{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .city{
+      position:relative;
+      background:linear-gradient(180deg,#fffaf2,#fff2df);
+      border:2px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      min-height:88px;
+      transition:transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .city.active{
+      border-color:#f59e0b;
+      background:linear-gradient(180deg,#fff5df,#ffe7be);
+      transform:translateY(-2px);
+    }
+    .city.done{
+      border-color:#86efac;
+      background:linear-gradient(180deg,#f7fff6,#eafbe7);
+    }
+    .city.locked{
+      opacity:.55;
+      filter:grayscale(.15);
+    }
+    .city .num{
+      font-size:12px;
+      font-weight:800;
+      color:#9a6d3d;
+      margin-bottom:6px;
+    }
+    .city .name{
+      font-size:18px;
+      font-weight:800;
+      color:#633b15;
+    }
+    .city .topic{
+      font-size:13px;
+      color:#7d5d3d;
+      margin-top:3px;
+    }
+    .city .emoji{
+      position:absolute;
+      right:10px;
+      top:8px;
+      font-size:24px;
+    }
+
+    .scenario{
+      background:linear-gradient(180deg,#fffaf5,#fff);
+      border:2px dashed #f0c58a;
+      border-radius:20px;
+      padding:16px;
+      margin-bottom:14px;
+    }
+    .badge{
+      display:inline-block;
+      background:#fff2dd;
+      color:#a05a00;
+      border:1px solid #f4c98f;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .question{
+      font-size:26px;
+      line-height:1.25;
+      margin:6px 0 0;
+      color:#4a2f15;
+      font-weight:800;
+    }
+    .story{
+      margin-top:10px;
+      font-size:15px;
+      color:#6c5136;
+      line-height:1.6;
+    }
+    .choices{
+      display:grid;
+      gap:10px;
+      margin-top:14px;
+    }
+    button.choice{
+      border:none;
+      border-radius:18px;
+      padding:14px 16px;
+      text-align:left;
+      background:linear-gradient(180deg,#ffd89f,#ffc568);
+      color:#5a3410;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(245,158,11,0.18);
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    button.choice:hover{ transform:translateY(-1px); filter:brightness(1.02); }
+    button.choice:active{ transform:translateY(1px); }
+    button.choice:disabled{ cursor:not-allowed; opacity:0.85; }
+    .feedback{
+      margin-top:14px;
+      border-radius:18px;
+      padding:14px 16px;
+      font-size:15px;
+      line-height:1.6;
+      display:none;
+    }
+    .feedback.good{
+      background:#ecfdf3;
+      border:2px solid #86efac;
+      color:#166534;
+    }
+    .feedback.bad{
+      background:#fef2f2;
+      border:2px solid #fca5a5;
+      color:#991b1b;
+    }
+    .summary-line{
+      margin-top:10px;
+      font-size:14px;
+      color:#855725;
+    }
+
+    .footer-note{
+      margin-top:18px;
+      text-align:center;
+      color:#7d5d3d;
+      font-size:14px;
+    }
+
+    .victory{
+      text-align:center;
+      padding:14px 8px 8px;
+    }
+    .victory h2{
+      font-size:36px;
+      margin:8px 0;
+      color:#7a4b20;
+    }
+    .victory p{
+      max-width:700px;
+      margin:10px auto;
+      line-height:1.7;
+      color:#6b4c2c;
+      font-size:17px;
+    }
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+      margin-top:18px;
+    }
+    .pill{
+      background:#fff2dd;
+      border:1px solid #f4c98f;
+      color:#8d5600;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+    }
+    .restart{
+      margin-top:20px;
+      display:inline-block;
+      background:linear-gradient(180deg,#f59e0b,#ea580c);
+      color:#fff;
+      border:none;
+      border-radius:999px;
+      padding:14px 24px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 10px 24px rgba(234,88,12,0.28);
+    }
+    .small{
+      font-size:13px;
+      color:#8b6b48;
+    }
+    @media (max-width: 860px){
+      .layout{grid-template-columns:1fr;}
+      .stats{grid-template-columns:1fr;}
+      .map{grid-template-columns:1fr;}
+      .question{font-size:22px;}
+    }
+  </style>
 </head>
 <body>
-<h1>Milk Tea Empire</h1>
-<p>Build your milk tea business using Strategic Cost Management!</p>
-<div id="game">
-<div id="profit">Profit: $0</div>
-<h2 id="question"></h2>
-<div id="choices"></div>
-<p id="result"></p>
-</div>
-<script>
-let profit = 0;
-let level = 0;
-const levels = [
-{question:"Which strategy will you choose for your milk tea shop?", choices:[{text:"Low Price",correct:true,profit:2000},{text:"Premium Brand",correct:true,profit:2500}],explain:"Strategy determines your cost structure."},
-{question:"Which of the following is a FIXED cost?", choices:[{text:"Milk Tea Ingredients",correct:false,profit:-500},{text:"Shop Rent",correct:true,profit:2000}],explain:"Fixed costs do not vary with sales."},
-{question:"Identify the variable cost for your shop.", choices:[{text:"Milk Tea Ingredients",correct:true,profit:1500},{text:"Shop Rent",correct:false,profit:-500}],explain:"Variable costs change with production volume."},
-{question:"A drink costs $2 to make and sells for $5. What is the contribution margin?", choices:[{text:"$3",correct:true,profit:3000},{text:"$5",correct:false,profit:-1000}],explain:"Contribution Margin = Price - Variable Cost."},
-{question:"Which product is losing money when using ABC costing?", choices:[{text:"Complex Taro Milk Tea",correct:true,profit:4000},{text:"Classic Black Tea",correct:false,profit:1000}],explain:"ABC costing reveals true product profitability."},
-{question:"Which customer is more profitable?", choices:[{text:"Large Order, high complaints",correct:false,profit:-1000},{text:"Regular Customer, low service cost",correct:true,profit:2500}],explain:"Customer profitability considers revenue minus service costs."},
-{question:"How many drinks must you sell to break even if fixed cost=$5000, contribution margin=$2?", choices:[{text:"2500",correct:true,profit:3000},{text:"5000",correct:false,profit:-1000}],explain:"Break-even point = Fixed Cost / Contribution Margin."},
-{question:"Company requests 500 drinks at a lower price. What should you consider?", choices:[{text:"Relevant cost only",correct:true,profit:4000},{text:"Ignore cost",correct:false,profit:-2000}],explain:"Only future relevant costs matter for the decision."},
-{question:"Customers complain about inconsistent taste. What should you implement?", choices:[{text:"Total Quality Management",correct:true,profit:5000},{text:"Ignore complaints",correct:false,profit:-3000}],explain:"TQM reduces defects and improves customer satisfaction."},
-{question:"Milk inventory frequently expires. Which system should you adopt?", choices:[{text:"Just-In-Time",correct:true,profit:6000},{text:"Increase stock",correct:false,profit:-2000}],explain:"JIT reduces waste and improves efficiency."}
-];
-function loadLevel(){
-if(level>=levels.length){
-document.getElementById("question").innerHTML="Congratulations! You built a Milk Tea Empire!";
-document.getElementById("choices").innerHTML="";
-document.getElementById("result").innerHTML="Final Profit: $"+profit;
-return;
-}
-let current = levels[level];
-document.getElementById("question").innerHTML="Level "+(level+1)+"<br><br>"+current.question;
-let buttons="";
-current.choices.forEach((choice,i)=>{buttons+=`<button onclick="choose(${i})">${choice.text}</button>`});
-document.getElementById("choices").innerHTML=buttons;
-document.getElementById("result").innerHTML="";
-}
-function choose(i){
-let current = levels[level];
-let choice = current.choices[i];
-profit+=choice.profit;
-document.getElementById("profit").innerHTML="Profit: $"+profit;
-let message = choice.correct?"Correct!":"Oops!";
-document.getElementById("result").innerHTML=message+"<br>"+current.explain;
-level++;
-setTimeout(loadLevel,2000);
-}
-loadLevel();
-</script>
+  <div class="wrap">
+    <section class="hero">
+      <h1>🧋 Milk Tea Empire: SCM World Tour</h1>
+      <p class="subtitle">Travel across 10 cities, make smart business decisions, and turn Strategic Cost Management into a fun expansion game.</p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Profit</div>
+          <div class="value" id="profitValue">$0</div>
+        </div>
+        <div class="stat">
+          <div class="label">City</div>
+          <div class="value" id="cityValue">1 / 10</div>
+        </div>
+        <div class="stat">
+          <div class="label">Empire Goal</div>
+          <div class="value">$100,000</div>
+        </div>
+      </div>
+
+      <div class="progress-panel">
+        <div class="progress-top">
+          <span>Empire Progress</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="summary-line">Reach the goal by mastering strategy, costing, decision-making, quality, and efficiency.</div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="card">
+        <h2 class="section-title">🌍 Expansion Map</h2>
+        <div class="map" id="map"></div>
+      </div>
+
+      <div class="card" id="gameCard">
+        <div id="gameContent"></div>
+      </div>
+    </section>
+
+    <div class="footer-note">ACCT90009 Strategic Cost Management · University of Melbourne · Scan, play, and learn</div>
+  </div>
+
+  <script>
+    const goal = 100000;
+    let profit = 0;
+    let currentLevel = 0;
+    let locked = false;
+
+    const levels = [
+      {
+        city: "Melbourne", emoji:"☕", topic:"Strategy",
+        title:"Choose your market entry strategy",
+        badge:"Level 1 · Strategy",
+        story:"You are opening your first milk tea shop in Melbourne. To survive, you need a clear competitive position.",
+        question:"Which strategy gives your business a clear competitive direction?",
+        choices:[
+          {text:"Choose a clear path: low-cost or premium differentiation", correct:true, delta:12000, explain:"Excellent. Strategy is the starting point of SCM. A clear position shapes pricing, customer value, and the whole cost structure."},
+          {text:"Mix random discounts with luxury branding and hope it works", correct:false, delta:-5000, explain:"Not ideal. Without a coherent strategy, your pricing, service design, and cost system become inconsistent."}
+        ]
+      },
+      {
+        city: "Sydney", emoji:"🏠", topic:"Cost Behaviour",
+        title:"Understand how your costs move",
+        badge:"Level 2 · Cost Behaviour",
+        story:"Your second store opens in Sydney. Sales fluctuate, and you need to know which costs change with volume and which do not.",
+        question:"Which of the following is most likely a fixed cost for your store?",
+        choices:[
+          {text:"Monthly shop rent", correct:true, delta:9000, explain:"Correct. Rent usually stays the same within a relevant range, so it behaves like a fixed cost."},
+          {text:"Milk, tea leaves, and toppings for each drink sold", correct:false, delta:-3500, explain:"These are variable costs because they rise as more drinks are made and sold."}
+        ]
+      },
+      {
+        city: "Shanghai", emoji:"📈", topic:"Cost Estimation",
+        title:"Predict future costs",
+        badge:"Level 3 · Cost Estimation",
+        story:"You are planning expansion into Shanghai and need to forecast utilities and staffing support as volume grows.",
+        question:"Why do managers estimate a cost function such as Cost = a + bX?",
+        choices:[
+          {text:"To separate fixed and variable components and forecast future cost", correct:true, delta:10000, explain:"Exactly. Cost estimation helps managers budget, plan, and analyze how cost responds to activity."},
+          {text:"To calculate last year’s sunk costs more precisely", correct:false, delta:-3000, explain:"That misses the point. Cost estimation is mainly useful for planning and future-oriented analysis."}
+        ]
+      },
+      {
+        city: "Tokyo", emoji:"🧪", topic:"ABC Costing",
+        title:"Find the true cost of complex drinks",
+        badge:"Level 4 · Activity-Based Costing",
+        story:"In Tokyo, customized drinks are booming. Some menu items look popular, but they take much longer to prepare.",
+        question:"Which costing method best captures the extra resources used by complex customized drinks?",
+        choices:[
+          {text:"Activity-Based Costing, using activity drivers like setups and prep time", correct:true, delta:14000, explain:"Great choice. ABC traces overhead more accurately by linking costs to the activities that cause them."},
+          {text:"Spread all overhead evenly across drinks regardless of complexity", correct:false, delta:-4500, explain:"Traditional averaging can distort product costs, especially when products consume activities differently."}
+        ]
+      },
+      {
+        city: "Seoul", emoji:"🥤", topic:"Product Profitability",
+        title:"Keep only products that create value",
+        badge:"Level 5 · Product Profitability",
+        story:"Your Seoul menu has exploded with trendy flavors. Not every bestseller is actually profitable.",
+        question:"What is the smartest basis for deciding whether to keep a drink on the menu?",
+        choices:[
+          {text:"Analyze the drink’s revenue against its full resource consumption and support cost", correct:true, delta:10500, explain:"Yes. Product profitability focuses on whether a product truly contributes after considering the costs it drives."},
+          {text:"Keep any drink that looks popular on social media", correct:false, delta:-3500, explain:"Popularity can be misleading if a product consumes too much labor, waste, or support effort."}
+        ]
+      },
+      {
+        city: "Singapore", emoji:"👥", topic:"Customer Profitability",
+        title:"Not all customers are equally profitable",
+        badge:"Level 6 · Customer Profitability",
+        story:"In Singapore, corporate orders are growing fast. Some customers buy a lot but create huge service and complaint costs.",
+        question:"Which customer is usually more profitable?",
+        choices:[
+          {text:"A loyal customer with steady orders and low service cost", correct:true, delta:9500, explain:"Exactly. Customer profitability depends on revenue minus the service, delivery, support, and handling costs they trigger."},
+          {text:"A high-volume customer who constantly changes orders and demands refunds", correct:false, delta:-4000, explain:"Large revenue alone is not enough if service costs and complications consume the margin."}
+        ]
+      },
+      {
+        city: "New York", emoji:"💵", topic:"CVP",
+        title:"Break-even under pressure",
+        badge:"Level 7 · CVP Analysis",
+        story:"New York is expensive. Rent, wages, and marketing are high, so you need a clear sales target just to survive.",
+        question:"If fixed cost is $5,000 and contribution margin per drink is $2, how many drinks must you sell to break even?",
+        choices:[
+          {text:"2,500 drinks", correct:true, delta:11000, explain:"Correct. Break-even point = Fixed cost ÷ Contribution margin per unit = 5,000 ÷ 2."},
+          {text:"5,000 drinks", correct:false, delta:-2500, explain:"That is too high. CVP helps managers turn cost structure into a practical sales target."}
+        ]
+      },
+      {
+        city: "London", emoji:"🧾", topic:"Relevant Costing",
+        title:"Decide on a special order",
+        badge:"Level 8 · Relevant Costing",
+        story:"A festival in London asks for 500 drinks at a lower-than-usual selling price. The team is split on whether to accept.",
+        question:"Which information matters most for this decision?",
+        choices:[
+          {text:"Future costs and revenues that differ between accepting and rejecting the order", correct:true, delta:10000, explain:"Perfect. Relevant costing focuses on future differential items, not sunk costs that cannot be changed."},
+          {text:"The money you already spent on last month’s advertising", correct:false, delta:-3500, explain:"That is sunk. Past spending should not drive a current accept-or-reject decision."}
+        ]
+      },
+      {
+        city: "Paris", emoji:"✨", topic:"TQM",
+        title:"Protect your brand with quality",
+        badge:"Level 9 · Total Quality Management",
+        story:"In Paris, your premium image is at risk because taste and presentation are inconsistent across stores.",
+        question:"Which action best reflects Total Quality Management?",
+        choices:[
+          {text:"Invest in prevention, training, and process control to reduce failure costs", correct:true, delta:12000, explain:"Exactly. TQM emphasizes preventing defects rather than paying for internal and external failures later."},
+          {text:"Save money by reducing training and fixing mistakes only after customers complain", correct:false, delta:-5000, explain:"Reactive quality management usually increases rework, refunds, and damage to the brand."}
+        ]
+      },
+      {
+        city: "Global Empire", emoji:"🚚", topic:"JIT & Efficiency",
+        title:"Scale with speed and less waste",
+        badge:"Level 10 · Just-in-Time",
+        story:"You are now running a global chain. Inventory waste, spoilage, and slow replenishment are hurting performance.",
+        question:"Which system best reduces excess inventory and supports smoother operations?",
+        choices:[
+          {text:"Just-in-Time replenishment with tighter coordination and lower stock levels", correct:true, delta:15000, explain:"Well done. JIT reduces waste, shortens flow time, and improves efficiency when processes are reliable."},
+          {text:"Order as much inventory as possible so every store is always overstocked", correct:false, delta:-4500, explain:"Excess inventory ties up cash, increases spoilage, and can hide process problems."}
+        ]
+      }
+    ];
+
+    function renderMap(){
+      const map = document.getElementById('map');
+      map.innerHTML = '';
+      levels.forEach((lvl, i)=>{
+        const stateClass = i < currentLevel ? 'done' : i === currentLevel ? 'active' : 'locked';
+        const el = document.createElement('div');
+        el.className = `city ${stateClass}`;
+        el.innerHTML = `
+          <div class="num">CITY ${i+1}</div>
+          <div class="name">${lvl.city}</div>
+          <div class="topic">${lvl.topic}</div>
+          <div class="emoji">${lvl.emoji}</div>
+        `;
+        map.appendChild(el);
+      });
+    }
+
+    function updateStats(){
+      document.getElementById('profitValue').textContent = `$${profit.toLocaleString()}`;
+      document.getElementById('cityValue').textContent = `${Math.min(currentLevel + 1, levels.length)} / ${levels.length}`;
+      const percent = Math.max(0, Math.min(100, Math.round((profit / goal) * 100)));
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressText').textContent = percent + '%';
+    }
+
+    function renderLevel(){
+      renderMap();
+      updateStats();
+
+      const container = document.getElementById('gameContent');
+
+      if(currentLevel >= levels.length){
+        const win = profit >= goal;
+        container.innerHTML = `
+          <div class="victory">
+            <div class="badge">Final Result</div>
+            <h2>${win ? '🎉 You Built a Milk Tea Empire!' : '🧋 Your Brand Survived the World Tour!'}</h2>
+            <p>Your final profit is <strong>$${profit.toLocaleString()}</strong>. You have now walked through the full logic of Strategic Cost Management: from strategy and cost behaviour to costing systems, decision-making, quality, and operational efficiency.</p>
+            <div class="pill-row">
+              <div class="pill">Strategy</div>
+              <div class="pill">Cost Behaviour</div>
+              <div class="pill">Cost Estimation</div>
+              <div class="pill">ABC</div>
+              <div class="pill">Product Profitability</div>
+              <div class="pill">Customer Profitability</div>
+              <div class="pill">CVP</div>
+              <div class="pill">Relevant Cost</div>
+              <div class="pill">TQM</div>
+              <div class="pill">JIT</div>
+            </div>
+            <button class="restart" onclick="restartGame()">Play Again</button>
+            <p class="small">Tip: Replace your GitHub Pages index.html with this file and the same QR code will still work.</p>
+          </div>
+        `;
+        document.getElementById('cityValue').textContent = `${levels.length} / ${levels.length}`;
+        return;
+      }
+
+      const lvl = levels[currentLevel];
+      container.innerHTML = `
+        <div class="scenario">
+          <div class="badge">${lvl.badge}</div>
+          <div class="question">${lvl.title}</div>
+          <div class="story"><strong>${lvl.city}:</strong> ${lvl.story}</div>
+        </div>
+        <div class="question">${lvl.question}</div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"></div>
+      `;
+
+      const choicesEl = document.getElementById('choices');
+      lvl.choices.forEach((choice, index)=>{
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.innerHTML = `${String.fromCharCode(65 + index)}. ${choice.text}`;
+        btn.onclick = () => handleChoice(index);
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function handleChoice(index){
+      if(locked) return;
+      locked = true;
+      const lvl = levels[currentLevel];
+      const choice = lvl.choices[index];
+      profit += choice.delta;
+      updateStats();
+
+      const feedback = document.getElementById('feedback');
+      feedback.style.display = 'block';
+      feedback.className = 'feedback ' + (choice.correct ? 'good' : 'bad');
+      feedback.innerHTML = `
+        <strong>${choice.correct ? 'Great decision!' : 'Tough call!'}</strong><br>
+        ${choice.explain}<br><br>
+        <strong>Profit impact:</strong> ${choice.delta >= 0 ? '+' : ''}$${choice.delta.toLocaleString()}
+      `;
+
+      document.querySelectorAll('.choice').forEach(btn => btn.disabled = true);
+
+      setTimeout(()=>{
+        currentLevel++;
+        locked = false;
+        renderLevel();
+      }, 2200);
+    }
+
+    function restartGame(){
+      profit = 0;
+      currentLevel = 0;
+      locked = false;
+      renderLevel();
+    }
+
+    renderLevel();
+  </script>
 </body>
 </html>
