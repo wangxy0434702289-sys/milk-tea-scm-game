@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Milk Tea Empire - SCM Game</title>
+<style>
+body{font-family: Arial;text-align:center;background:#fff6e9;padding:40px;}
+h1{color:#b35a00;}
+#game{background:white;padding:30px;border-radius:15px;max-width:600px;margin:auto;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+button{padding:12px 20px;margin:10px;font-size:16px;border:none;border-radius:8px;background:#ffb347;cursor:pointer;}
+button:hover{background:#ff9a00;}
+#profit{font-size:20px;margin-bottom:20px;color:#333;}
+</style>
+</head>
+<body>
+<h1>Milk Tea Empire</h1>
+<p>Build your milk tea business using Strategic Cost Management!</p>
+<div id="game">
+<div id="profit">Profit: $0</div>
+<h2 id="question"></h2>
+<div id="choices"></div>
+<p id="result"></p>
+</div>
+<script>
+let profit = 0;
+let level = 0;
+const levels = [
+{question:"Which strategy will you choose for your milk tea shop?", choices:[{text:"Low Price",correct:true,profit:2000},{text:"Premium Brand",correct:true,profit:2500}],explain:"Strategy determines your cost structure."},
+{question:"Which of the following is a FIXED cost?", choices:[{text:"Milk Tea Ingredients",correct:false,profit:-500},{text:"Shop Rent",correct:true,profit:2000}],explain:"Fixed costs do not vary with sales."},
+{question:"Identify the variable cost for your shop.", choices:[{text:"Milk Tea Ingredients",correct:true,profit:1500},{text:"Shop Rent",correct:false,profit:-500}],explain:"Variable costs change with production volume."},
+{question:"A drink costs $2 to make and sells for $5. What is the contribution margin?", choices:[{text:"$3",correct:true,profit:3000},{text:"$5",correct:false,profit:-1000}],explain:"Contribution Margin = Price - Variable Cost."},
+{question:"Which product is losing money when using ABC costing?", choices:[{text:"Complex Taro Milk Tea",correct:true,profit:4000},{text:"Classic Black Tea",correct:false,profit:1000}],explain:"ABC costing reveals true product profitability."},
+{question:"Which customer is more profitable?", choices:[{text:"Large Order, high complaints",correct:false,profit:-1000},{text:"Regular Customer, low service cost",correct:true,profit:2500}],explain:"Customer profitability considers revenue minus service costs."},
+{question:"How many drinks must you sell to break even if fixed cost=$5000, contribution margin=$2?", choices:[{text:"2500",correct:true,profit:3000},{text:"5000",correct:false,profit:-1000}],explain:"Break-even point = Fixed Cost / Contribution Margin."},
+{question:"Company requests 500 drinks at a lower price. What should you consider?", choices:[{text:"Relevant cost only",correct:true,profit:4000},{text:"Ignore cost",correct:false,profit:-2000}],explain:"Only future relevant costs matter for the decision."},
+{question:"Customers complain about inconsistent taste. What should you implement?", choices:[{text:"Total Quality Management",correct:true,profit:5000},{text:"Ignore complaints",correct:false,profit:-3000}],explain:"TQM reduces defects and improves customer satisfaction."},
+{question:"Milk inventory frequently expires. Which system should you adopt?", choices:[{text:"Just-In-Time",correct:true,profit:6000},{text:"Increase stock",correct:false,profit:-2000}],explain:"JIT reduces waste and improves efficiency."}
+];
+function loadLevel(){
+if(level>=levels.length){
+document.getElementById("question").innerHTML="Congratulations! You built a Milk Tea Empire!";
+document.getElementById("choices").innerHTML="";
+document.getElementById("result").innerHTML="Final Profit: $"+profit;
+return;
+}
+let current = levels[level];
+document.getElementById("question").innerHTML="Level "+(level+1)+"<br><br>"+current.question;
+let buttons="";
+current.choices.forEach((choice,i)=>{buttons+=`<button onclick="choose(${i})">${choice.text}</button>`});
+document.getElementById("choices").innerHTML=buttons;
+document.getElementById("result").innerHTML="";
+}
+function choose(i){
+let current = levels[level];
+let choice = current.choices[i];
+profit+=choice.profit;
+document.getElementById("profit").innerHTML="Profit: $"+profit;
+let message = choice.correct?"Correct!":"Oops!";
+document.getElementById("result").innerHTML=message+"<br>"+current.explain;
+level++;
+setTimeout(loadLevel,2000);
+}
+loadLevel();
+</script>
+</body>
+</html>
